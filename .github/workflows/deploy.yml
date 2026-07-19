@@ -99,6 +99,10 @@ jobs:
           ls -la bin/em/ || true
           ls -la _site/
 
+      - name: Patch generated Emscripten target lookup
+        run: |
+          perl -0pi -e 's/var findEventTarget=target=>\{target=maybeCStringToJsString\(target\);var domElement=specialHTMLTargets\[target\]\|\|\(typeof document!=\"undefined\"\?document\.querySelector\(target\):null\);return domElement\}/var findEventTarget=target=>{target=maybeCStringToJsString(target);if(target === \"\" && typeof document!=\"undefined\"){return document.querySelector(\"#canvas\")}var domElement=specialHTMLTargets[target]||(typeof document!=\"undefined\"?document.querySelector(target):null);return domElement}/' _site/index.js
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
