@@ -1,6 +1,7 @@
 obj/
 bin/*.app
 bin/data/.cache/
+.vscode/browse.db*
 *.o
 *.a
 *.d

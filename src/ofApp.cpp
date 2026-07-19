@@ -1,46 +1,509 @@
 #include "ofApp.h"
+#include <sstream>
+#include <algorithm>
+#include <cctype>
+#include <cstdlib>
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::setup()
-{
+namespace {
+const float PAT_SOURCE_W = 377.87529f;
+const float PAT_SOURCE_H = 377.95346f;
+
+const std::string AP105_PATH_D = R"(M 18.012514,0.00328819 V 18.017953 H 0 v 9.608428 H 13.267106 L 0.00435402,40.889121 1.96535e-4,40.885321 V 55.186885 L 0.00435402,55.190665 27.573022,27.621997 h 0.04573 v -0.04347 L 55.187418,0.00986457 55.180615,0.00230551 H 40.868164 L 40.879124,0.01364409 27.618542,13.274192 V 0.00275906 Z m 67.818618,0 L 0,85.836574 V 292.10611 l 85.831132,85.83118 -0.01512,0.0151 H 292.00933 l -0.0197,-0.0227 85.8834,-85.88338 0.002,0.002 V 85.887749 l -0.002,0.0021 L 291.98318,0 Z m 236.860998,0 -0.007,0.00755905 27.56649,27.56647576 v 0.04611 h 0.0457 l 27.56867,27.568668 0.009,-0.0076 V 40.883036 l -0.009,0.0076 -13.26275,-13.26274 h 13.27147 v -9.60839 H 359.86677 V 0.0047622 h -9.61495 V 13.276195 l -13.2604,-13.26058555 0.011,-0.01133858 z M 95.071502,5.0731465 H 282.74272 L 372.814,95.144455 V 282.80042 l -90.07347,90.07566 H 95.07586 L 5.0023861,282.80257 V 95.142263 Z M 188.9082,22.26686 c -92.009795,0 -166.703434,74.693658 -166.703434,166.70342 0,92.0098 74.693639,166.71213 166.703434,166.71213 92.00979,0 166.70996,-74.70233 166.70996,-166.71213 0,-92.009762 -74.70017,-166.70342 -166.70996,-166.70342 z m 0,10.11583 c 86.54364,0 156.59412,70.04393 156.59412,156.58759 0,86.54366 -70.05048,156.59626 -156.59412,156.59626 -86.54365,0 -156.596305,-70.0526 -156.596305,-156.59626 0,-86.54366 70.052655,-156.58759 156.596305,-156.58759 z m 0,24.49576 c -72.89434,0 -132.091791,59.19748 -132.091791,132.09183 0,72.89435 59.197451,132.1005 132.091791,132.1005 72.89433,0 132.09832,-59.20615 132.09832,-132.1005 0,-72.89435 -59.20399,-132.09183 -132.09832,-132.09183 z m -5.05465,10.224745 v 0.0038 243.729755 C 125.37912,308.45933 77.591248,265.03082 68.493729,208.55515 h 87.653941 l -0.074,67.38743 C 134.78182,267.87979 117.29799,252.87434 106.187,233.51266 h 25.47362 v 13.95091 h 10.11586 V 223.39679 H 89.378751 l 3.316774,7.178 c 12.795735,27.68716 37.163225,48.88097 66.975815,57.7725 l 6.49417,1.93383 0.11543,-91.8418 H 67.285062 c -0.239546,-3.1262 -0.361512,-6.28528 -0.361512,-9.47342 0,-4.13775 0.208517,-8.2255 0.609782,-12.25663 h 98.747618 l -0.11543,-91.841804 -6.49417,1.936025 c -29.8126,8.891528 -54.18008,30.085379 -66.975821,57.772499 l -3.316778,7.17796 h 52.397689 v -24.06674 h -10.11585 v 13.95091 h -25.4671 c 11.11125,-19.35813 28.59097,-34.36165 49.88015,-42.423379 l 0.074,67.378699 H 68.972859 C 79.167791,111.48071 126.34323,69.441664 183.85356,67.103195 Z m 10.10713,0.0038 c 57.51126,2.337563 104.6856,44.376865 114.8807,99.490275 h -88.19405 l 0.0827,-67.37869 c 21.28811,8.062 38.76061,23.06589 49.87143,42.42331 h -25.46708 v -13.95085 h -10.11584 v 24.06679 h 52.39767 l -3.31678,-7.17804 c -12.79573,-27.6906 -37.1632,-48.885166 -66.9758,-57.776694 l -6.49418,-1.936025 -0.11543,91.841799 h 99.769 c 0.40124,4.03113 0.60761,8.11892 0.60761,12.25663 0,3.18815 -0.122,6.34723 -0.36151,9.47343 H 210.51407 l 0.11543,91.8418 6.49417,-1.93384 c 29.8126,-8.89152 54.18007,-30.08534 66.97581,-57.77249 l 3.31677,-7.17801 h -52.39767 v 24.06679 h 10.11585 v -13.95092 h 25.47364 c -11.11059,19.36097 -28.58718,34.36694 -49.87798,42.42992 l -0.0827,-67.38742 h 88.67534 c -9.09758,56.47642 -56.8866,99.90515 -115.362,102.28214 z m 183.91234,255.648755 -3.57376,3.57377 -23.99272,23.99274 h -0.0544 v 0.0544 l -27.56213,27.55997 0.0151,0.0151 h 14.30374 l -0.0132,-0.0113 13.25622,-13.2562 v 13.26924 h 9.61494 V 359.9323 h 18.00817 v -9.60624 h -13.26275 l 13.26056,-13.26058 0.002,0.002 V 322.75966 Z M 0,322.75951 v 14.30593 l 13.271463,13.25631 -13.271417645669,0.002 v 9.60839 L 18.012518,359.93014 v 18.02121 h 9.60624 v -13.28013 l 13.267105,13.26709 -0.01323,0.0113 H 55.16766 l 0.01965,-0.0227 z)";
+
+bool esComandoPath(char c) {
+    switch (c) {
+        case 'M': case 'm': case 'L': case 'l': case 'H': case 'h':
+        case 'V': case 'v': case 'C': case 'c': case 'Z': case 'z':
+            return true;
+        default:
+            return false;
+    }
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::update()
-{
+bool esTokenComando(const std::string& token) {
+    return token.size() == 1 && esComandoPath(token[0]);
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::draw()
-{
+std::vector<std::string> tokenizarPathSVG(const std::string& d) {
+    std::vector<std::string> tokens;
+    for (size_t i = 0; i < d.size();) {
+        char c = d[i];
+        if (std::isspace((unsigned char)c) || c == ',') {
+            i++;
+        } else if (esComandoPath(c)) {
+            tokens.push_back(std::string(1, c));
+            i++;
+        } else {
+            size_t start = i;
+            if (d[i] == '-' || d[i] == '+') i++;
+            while (i < d.size() && std::isdigit((unsigned char)d[i])) i++;
+            if (i < d.size() && d[i] == '.') {
+                i++;
+                while (i < d.size() && std::isdigit((unsigned char)d[i])) i++;
+            }
+            if (i < d.size() && (d[i] == 'e' || d[i] == 'E')) {
+                i++;
+                if (i < d.size() && (d[i] == '-' || d[i] == '+')) i++;
+                while (i < d.size() && std::isdigit((unsigned char)d[i])) i++;
+            }
+            tokens.push_back(d.substr(start, i - start));
+        }
+    }
+    return tokens;
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::keyPressed(int key)
-{
+float leerNumeroPath(const std::vector<std::string>& tokens, size_t& i) {
+    return std::strtof(tokens[i++].c_str(), nullptr);
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::keyReleased(int key)
-{
+ofPath parsearPathSVGOriginal(const std::string& d) {
+    auto tokens = tokenizarPathSVG(d);
+    ofPath path;
+    path.clear();
+    path.setFilled(true);
+    path.setFillColor(ofColor::black);
+    path.setStrokeWidth(0);
+    path.setPolyWindingMode(OF_POLY_WINDING_ODD);
+    path.setCurveResolution(48);
+
+    char cmd = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    float startX = 0.0f;
+    float startY = 0.0f;
+
+    for (size_t i = 0; i < tokens.size();) {
+        if (esTokenComando(tokens[i])) cmd = tokens[i++][0];
+        bool rel = std::islower((unsigned char)cmd);
+        char op = std::toupper((unsigned char)cmd);
+
+        if (op == 'Z') {
+            path.close();
+            x = startX;
+            y = startY;
+            continue;
+        }
+
+        if (op == 'M') {
+            bool firstPoint = true;
+            while (i + 1 < tokens.size() && !esTokenComando(tokens[i])) {
+                float nx = leerNumeroPath(tokens, i);
+                float ny = leerNumeroPath(tokens, i);
+                if (rel) { nx += x; ny += y; }
+                x = nx;
+                y = ny;
+                if (firstPoint) {
+                    path.moveTo(x, y);
+                    startX = x;
+                    startY = y;
+                    firstPoint = false;
+                } else {
+                    path.lineTo(x, y);
+                }
+            }
+        } else if (op == 'L') {
+            while (i + 1 < tokens.size() && !esTokenComando(tokens[i])) {
+                float nx = leerNumeroPath(tokens, i);
+                float ny = leerNumeroPath(tokens, i);
+                if (rel) { nx += x; ny += y; }
+                path.lineTo(nx, ny);
+                x = nx;
+                y = ny;
+            }
+        } else if (op == 'H') {
+            while (i < tokens.size() && !esTokenComando(tokens[i])) {
+                float nx = leerNumeroPath(tokens, i);
+                if (rel) nx += x;
+                path.lineTo(nx, y);
+                x = nx;
+            }
+        } else if (op == 'V') {
+            while (i < tokens.size() && !esTokenComando(tokens[i])) {
+                float ny = leerNumeroPath(tokens, i);
+                if (rel) ny += y;
+                path.lineTo(x, ny);
+                y = ny;
+            }
+        } else if (op == 'C') {
+            while (i + 5 < tokens.size() && !esTokenComando(tokens[i])) {
+                float x1 = leerNumeroPath(tokens, i);
+                float y1 = leerNumeroPath(tokens, i);
+                float x2 = leerNumeroPath(tokens, i);
+                float y2 = leerNumeroPath(tokens, i);
+                float nx = leerNumeroPath(tokens, i);
+                float ny = leerNumeroPath(tokens, i);
+                if (rel) {
+                    x1 += x; y1 += y;
+                    x2 += x; y2 += y;
+                    nx += x; ny += y;
+                }
+                path.bezierTo(x1, y1, x2, y2, nx, ny);
+                x = nx;
+                y = ny;
+            }
+        }
+    }
+
+    return path;
+}
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::mouseMoved(int x, int y)
-{
+// Convierte paths relativos del SVG en puntos absolutos.
+std::vector<glm::vec2> ofApp::parsearPathSVGRelativo(const std::string& d) {
+    std::string s;
+    for (char c : d)
+        s += (c == ',' || c == 'm' || c == 'M' || c == 'z' || c == 'Z') ? ' ' : c;
+    std::istringstream ss(s);
+    std::vector<glm::vec2> pts;
+    float x, y;
+    if (!(ss >> x >> y)) return pts;
+    pts.push_back({x, y});
+    float cx = x, cy = y, dx, dy;
+    while (ss >> dx >> dy) { cx += dx; cy += dy; pts.push_back({cx, cy}); }
+    return pts;
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::mouseDragged(int x, int y, int button)
-{
+// Arma una linea gruesa como triangle strip.
+void ofApp::armarMallaEspiral(Spiral& sp) {
+    sp.mesh.clear();
+    sp.mesh.setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
+
+    std::vector<glm::vec3> pts;
+    pts.reserve(sp.steps + 1);
+    for (int i = 0; i <= sp.steps; i++) {
+        float u = float(i) / sp.steps;
+        float a = sp.argument + u * sp.revolutions * TWO_PI;
+        float r = sp.maxRadius * pow(u, sp.expansion);
+        pts.push_back({sp.cx + r * cos(a), sp.cy + r * sin(a), 0.f});
+    }
+
+    float hw = sp.strokeWidth * 0.5f;
+    float span = sp.gradX1 - sp.gradX0;
+    for (int i = 0; i < (int)pts.size(); i++) {
+        glm::vec3 dir;
+        if      (i == 0)                   dir = glm::normalize(pts[1]   - pts[0]);
+        else if (i == (int)pts.size() - 1) dir = glm::normalize(pts[i]   - pts[i-1]);
+        else                               dir = glm::normalize(pts[i+1] - pts[i-1]);
+
+        glm::vec3 n = glm::vec3(-dir.y, dir.x, 0.f) * hw;
+
+        float u = ofClamp((pts[i].x - sp.gradX0) / span, 0.f, 1.f);
+        ofColor col = sp.colStart.getLerped(sp.colEnd, u);
+
+        sp.mesh.addVertex(pts[i] + n);  sp.mesh.addColor(col);
+        sp.mesh.addVertex(pts[i] - n);  sp.mesh.addColor(col);
+    }
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::mousePressed(int x, int y, int button)
-{
+void ofApp::setup() {
+    ofSetWindowTitle("drawing.svg · animated");
+    ofSetFrameRate(60);
+    ofBackground(255);
+    ofSetCircleResolution(160);
+    ofEnableSmoothing();
+    ofEnableAntiAliasing();
+
+    configurarPatron();
+    configurarEspirales();
+    configurarEstrellas();
+    configurarCaja();
 }
 
-///////////////////////////////////////////////////////////////////////////
-void ofApp::mouseReleased(int x, int y, int button)
-{
+void ofApp::configurarPatron() {
+    patPath = parsearPathSVGOriginal(AP105_PATH_D);
 }
+
+void ofApp::configurarEspirales() {
+    // Spiral 1 (path1)
+    // sodipodi: cx=531.877 cy=290.411 radius=944.324 revolution=3
+    //           argument=-18.444664  stroke=linearGradient61 (red→transparent)
+    sp1.cx          = 531.877f;
+    sp1.cy          = 290.411f;
+    sp1.maxRadius   = 944.324f;
+    sp1.revolutions = 3.0f;
+    sp1.argument    = -18.4447f;
+    sp1.expansion   = 1.0f;
+    sp1.strokeWidth = 60.565f;
+    sp1.colStart    = ofColor(255, 0, 0, 255);
+    sp1.colEnd      = ofColor(255, 0, 0, 0);
+    sp1.gradX0      = -265.89f;   // linearGradient61 x1
+    sp1.gradX1      =  1486.66f;  // linearGradient61 x2
+    sp1.spinSpeed   = 0.5f;
+
+    // Spiral 2 (path2 + SVG matrix transform)
+    // SVG: matrix(0.785,0,0,0.785,-50.30,-133.69) applied before drawing.
+    {
+        const float sc = 0.78531339f;
+        sp2.cx          = sc * 1876.2537f - 50.29775f;
+        sp2.cy          = sc * 861.44513f - 133.69286f;
+        sp2.maxRadius   = sc * 1006.0836f;
+        sp2.revolutions = 3.0f;
+        sp2.argument    = -21.6643f;
+        sp2.expansion   = 1.0f;
+        sp2.strokeWidth = 60.565f * sc;
+        sp2.colStart    = ofColor(255, 0, 214, 255);  // magenta #ff00d6
+        sp2.colEnd      = ofColor(255, 0, 0,   0);
+        sp2.gradX0      =  856.52f;   // linearGradient60 x1
+        sp2.gradX1      = 2728.66f;   // linearGradient60 x2
+        sp2.spinSpeed   = -0.3f;
+    }
+
+    armarMallaEspiral(sp1);
+    armarMallaEspiral(sp2);
+}
+
+void ofApp::configurarEstrellas() {
+    // Estrellas.
+    // 4 irregular 9-pointed stars (fill:#262626).
+    // Paths: "m X,Y [dx,dy]* z" parsed into absolute coords.
+    struct SrcStar { std::string id; std::string d; glm::vec2 center; };
+    const SrcStar starDefs[] = {
+        {
+            "path139",
+            "m 1346.7693,448.11913 -7.4623,109.14037 192.4835,-42.99887 "
+            "-124.0391,273.55488 -126.53,108.63787 27.893,-21.34117 "
+            "-252.2303,74.11438 -73.29207,-188.03112 -112.8243,64.66065 "
+            "-121.69763,-7.18217 5.77723,-75.41869 60.40026,-151.49079 "
+            "36.91315,-107.26602 -13.15916,-56.8578 35.03273,-111.2162 "
+            "300.71039,0.97289 13.8744,-112.6139 29.8305,139.90941 z",
+            {1110.0961f, 562.2192f}
+        },
+        {
+            "path140",
+            "m 1463.625,150.98283 -38.5433,38.33562 35.1424,-150.137804 "
+            "50.6,-54.614857 30.335,-53.647889 110.2148,53.953767 "
+            "32.1085,-33.313342 51.2923,126.397197 104.8594,-41.849585 "
+            "-88.5486,176.322403 26.5901,28.29094 42.3622,81.18872 "
+            "-16.1808,42.57725 -131.9883,-21.8406 -24.9861,60.24679 "
+            "-76.9442,-99.01931 -119.3103,65.06751 53.2913,-135.13025 z",
+            {1632.1568f, 180.71332f}
+        },
+        {
+            "path141",
+            "m 522.28086,336.43821 -6.1085,29.74728 -94.28471,19.91867 "
+            "-65.70705,65.61087 -34.33864,-34.297 -43.72232,-62.67352 "
+            "-135.6539,5.90077 35.36839,9.63096 -91.243974,-75.97722 "
+            "53.353144,-54.48316 -17.32816,-104.99929 138.18799,-67.212844 "
+            "78.60476,23.17501 82.51013,-7.283019 73.88241,34.349733 "
+            "12.23017,-21.514112 38.70576,161.851152 -96.44554,-36.29617 z",
+            {327.00505f, 261.03034f}
+        },
+        {
+            "path142",
+            "m 1862.1805,980.71466 -76.398,41.45604 -36.8919,139.298 "
+            "-75.9982,-70.0932 -133.9083,-8.3151 15.4648,-112.26444 "
+            "-76.6467,-43.66825 -3.8027,-98.49 13.7612,-24.46528 "
+            "117.5469,-38.038 -30.6042,-50.40896 140.3902,-2.91424 "
+            "80.8284,-19.86242 -34.8856,33.56901 88.2342,-36.73681 "
+            "45.6042,68.27784 119.6976,150.31551 -153.6225,13.34663 z",
+            {1715.3423f, 892.09272f}
+        }
+    };
+
+    for (auto& src : starDefs) {
+        auto verts = parsearPathSVGRelativo(src.d);
+        Star s;
+        s.id = src.id;
+        s.svgCenter = src.center;
+        s.path.setFillColor(ofColor(38, 38, 38));
+        s.path.setFilled(true);
+        s.path.setStrokeWidth(0);
+        if (!verts.empty()) {
+            s.path.moveTo(verts[0].x, verts[0].y);
+            for (size_t i = 1; i < verts.size(); i++)
+                s.path.lineTo(verts[i].x, verts[i].y);
+            s.path.close();
+        }
+        s.freqX  = ofRandom(0.08f, 0.18f);
+        s.freqY  = ofRandom(0.07f, 0.15f);
+        s.ampX   = ofRandom(40.f,  90.f);
+        s.ampY   = ofRandom(30.f,  70.f);
+        s.phaseX = ofRandom(TWO_PI);
+        s.phaseY = ofRandom(TWO_PI);
+        s.angleVel = ofRandom(-0.12f, 0.12f);
+        stars.push_back(std::move(s));
+    }
+
+}
+
+void ofApp::configurarCaja() {
+    // Caras de la caja (g80, amarillo #fcfc03).
+    // Negative X is intentional — box partially off the left canvas edge.
+    boxFaces = {
+        {{289.861f,390.770f},{666.929f,252.881f},{-129.895f,879.920f},{-119.258f,712.715f}},
+        {{666.929f,252.881f},{-129.895f,879.920f},{42.112f,832.768f},{838.936f,205.729f}},
+        {{289.861f,390.770f},{666.929f,252.881f},{838.936f,205.729f},{378.176f,366.560f}},
+        {{-119.258f,712.715f},{-129.895f,879.920f},{42.112f,832.768f},{-30.943f,688.505f}},
+        {{289.861f,390.770f},{-119.258f,712.715f},{-30.943f,688.505f},{378.176f,366.560f}},
+        {{378.176f,366.560f},{838.936f,205.729f},{42.112f,832.768f},{-30.943f,688.505f}},
+    };
+}
+
+void ofApp::update() {
+    if (paused) return;
+
+    actualizarAnimacion();
+}
+
+void ofApp::actualizarAnimacion() {
+    float dt = ofGetLastFrameTime();
+    t += dt;
+
+    sp1.argument += sp1.spinSpeed * dt;
+    sp2.argument += sp2.spinSpeed * dt;
+    armarMallaEspiral(sp1);
+    armarMallaEspiral(sp2);
+
+    for (auto& s : stars)
+        s.angle += s.angleVel * dt;
+
+    boxDrift.x = sin(t * 0.22f) * 55.0f;
+    boxDrift.y = cos(t * 0.15f) * 35.0f;
+}
+
+void ofApp::dibujarPatron() {
+    float tile = patTile * patScale;
+    int cols = int(1920.0f / tile) + 6;
+    int rows = int(1080.0f / tile) + 6;
+    float ox = fmod(patOffX, tile) - 2.0f * tile;
+    float oy = fmod(patOffY, tile) - 2.0f * tile;
+
+    ofPushMatrix();
+    ofTranslate(960, 540);
+    ofRotateDeg(patAngle);
+    ofTranslate(-960, -540);
+    ofTranslate(ox, oy);
+
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            float tx = col * tile;
+            float ty = row * tile;
+            ofPushMatrix();
+            ofTranslate(tx, ty);
+            ofScale(tile / PAT_SOURCE_W, tile / PAT_SOURCE_H);
+            patPath.draw();
+            ofPopMatrix();
+        }
+    }
+    ofPopMatrix();
+}
+
+void ofApp::dibujarCaja() {
+    const glm::vec2 boxCenter = {200.0f, 550.0f};
+    ofFill();
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+
+    for (int pass = 28; pass >= 0; pass--) {
+        float expand = 1.0f + pass * 0.065f;
+        ofSetColor(252, 252, 3, 11);
+        for (auto& face : boxFaces) {
+            ofPushMatrix();
+            ofTranslate(boxDrift.x, boxDrift.y);
+            ofTranslate(boxCenter);
+            ofScale(expand);
+            ofTranslate(-boxCenter);
+            ofBeginShape();
+            for (auto& p : face) ofVertex(p.x, p.y);
+            ofEndShape(true);
+            ofPopMatrix();
+        }
+    }
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+}
+
+void ofApp::dibujarEstrellas() {
+    for (auto& s : stars) {
+        float dx = s.ampX * sin(t * s.freqX + s.phaseX);
+        float dy = s.ampY * cos(t * s.freqY + s.phaseY);
+        ofPushMatrix();
+        ofTranslate(dx, dy);
+        ofTranslate(s.svgCenter.x, s.svgCenter.y);
+        ofRotateRad(s.angle);
+        ofTranslate(-s.svgCenter.x, -s.svgCenter.y);
+        s.path.draw();
+        ofPopMatrix();
+    }
+}
+
+void ofApp::dibujarEspirales() {
+    ofFill();
+    sp1.mesh.draw();
+    sp2.mesh.draw();
+}
+
+void ofApp::dibujarHUD() {
+    if (!showHUD) return;
+    std::string info =
+        "── Pattern ──────────────────────\n"
+        "  q/w    patScale     = " + ofToString(patScale,     2) + "\n"
+        "  e/r    patTile      = " + ofToString(patTile,      1) + " px\n"
+        "  z/x    patAngle     = " + ofToString(patAngle,      1) + "\n"
+        "  arrows patOffset    = " + ofToString((int)patOffX)+","+ofToString((int)patOffY)+"\n"
+        "── Spirals ──────────────────────\n"
+        "  1/2    sp1 spinSpeed   = " + ofToString(sp1.spinSpeed, 2) + " rad/s\n"
+        "  3/4    sp2 spinSpeed   = " + ofToString(sp2.spinSpeed, 2) + " rad/s\n"
+        "  5/6    sp1 revolutions = " + ofToString(sp1.revolutions, 1) + "\n"
+        "  7/8    sp2 revolutions = " + ofToString(sp2.revolutions, 1) + "\n"
+        "  9/0    sp1 maxRadius   = " + ofToString((int)sp1.maxRadius) + "\n"
+        "── Global ───────────────────────\n"
+        "  SPACE  pause / resume\n"
+        "  h      toggle HUD\n";
+    ofDrawBitmapStringHighlight(info, 12, 18,
+        ofColor(0,0,0,160), ofColor(255,255,255,180));
+}
+
+void ofApp::draw() {
+    ofBackground(255);
+
+    // Scale SVG space (1920×1080) to fit window
+    float sc = std::min(ofGetWidth()  / 1920.0f,
+                        ofGetHeight() / 1080.0f);
+    float tx = (ofGetWidth()  - 1920.0f * sc) * 0.5f;
+    float ty = (ofGetHeight() - 1080.0f * sc) * 0.5f;
+
+    ofPushMatrix();
+    ofTranslate(tx, ty);
+    ofScale(sc);
+
+    dibujarPatron();
+    dibujarCaja();
+    dibujarEstrellas();
+    dibujarEspirales();
+
+    ofPopMatrix();
+
+    dibujarHUD();
+}
+
+void ofApp::keyPressed(int key) {
+    switch (key) {
+        case 'q': patScale     = std::max(0.2f, patScale     - 0.1f);  break;
+        case 'w': patScale     = std::min(6.0f, patScale     + 0.1f);  break;
+        case 'e': patTile      = std::max(20.f, patTile      - 5.0f);  break;
+        case 'r': patTile      = std::min(200.f,patTile      + 5.0f);  break;
+        case 'z': patAngle     -= 2.0f; break;
+        case 'x': patAngle     += 2.0f; break;
+        case OF_KEY_LEFT:  patOffX -= 10.0f; break;
+        case OF_KEY_RIGHT: patOffX += 10.0f; break;
+        case OF_KEY_UP:    patOffY -= 10.0f; break;
+        case OF_KEY_DOWN:  patOffY += 10.0f; break;
+        case '1': sp1.spinSpeed -= 0.2f; break;
+        case '2': sp1.spinSpeed += 0.2f; break;
+        case '3': sp2.spinSpeed -= 0.2f; break;
+        case '4': sp2.spinSpeed += 0.2f; break;
+        case '5': sp1.revolutions = std::max(0.5f, sp1.revolutions - 0.5f); break;
+        case '6': sp1.revolutions = std::min(8.0f, sp1.revolutions + 0.5f); break;
+        case '7': sp2.revolutions = std::max(0.5f, sp2.revolutions - 0.5f); break;
+        case '8': sp2.revolutions = std::min(8.0f, sp2.revolutions + 0.5f); break;
+        case '9': sp1.maxRadius   = std::max(100.f, sp1.maxRadius - 80.f);  break;
+        case '0': sp1.maxRadius   = std::min(2000.f,sp1.maxRadius + 80.f);  break;
+        case ' ': paused  = !paused;  break;
+        case 'h': showHUD = !showHUD; break;
+    }
+}
+
+void ofApp::keyReleased(int key) {}
+void ofApp::mouseMoved(int x, int y) {}
+void ofApp::mouseDragged(int x, int y, int button) {}
+void ofApp::mousePressed(int x, int y, int button) {}
+void ofApp::mouseReleased(int x, int y, int button) {}
