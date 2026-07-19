@@ -46,7 +46,7 @@
 
 - [ ] **Step 1: Write the failing test**
 
-Create `/Users/alejoparinelli/facu/AM2/template_of/tests/camera_tracking_test.sh`:
+Create `/Users/alejoparinelli/facu/AM2/template_of/tests/camera_tracking_test.sh` with only setup and rename expectations:
 
 ```bash
 #!/usr/bin/env bash
@@ -54,23 +54,11 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+test "$(basename "$root")" = "prueba_camara"
 grep -Eq '^ofxOpenCv$' "$root/addons.make"
 test -f "$root/bin/data/haarcascade_frontalface_default.xml"
-grep -Eq '#include "ofxCvHaarFinder\.h"' "$root/src/ofApp.h"
-grep -Eq 'ofxCvHaarFinder[[:space:]]+path144FaceFinder' "$root/src/ofApp.h"
-grep -Eq 'ofRectangle[[:space:]]+path144Bounds' "$root/src/ofApp.h"
-grep -Eq 'glm::vec2[[:space:]]+path144CameraFocus' "$root/src/ofApp.h"
-grep -Eq 'actualizarTrackingRostroPath144\(\)' "$root/src/ofApp.h" "$root/src/ofApp.cpp"
-grep -Eq 'path144FaceFinder\.findHaarObjects' "$root/src/ofApp.cpp"
-grep -Eq 'uniform vec4 pathBounds' "$root/src/ofApp.cpp"
-grep -Eq 'uniform vec2 focusCenter' "$root/src/ofApp.cpp"
-grep -Eq 'uniform float mirrorCamera' "$root/src/ofApp.cpp"
-grep -Eq 'targetUv[[:space:]]*=[[:space:]]*clamp\(\(canvasPosition - pathBounds\.xy\) / pathBounds\.zw' "$root/src/ofApp.cpp"
-grep -Eq 'effectiveFocus\.x[[:space:]]*=[[:space:]]*1\.0 - effectiveFocus\.x' "$root/src/ofApp.cpp"
-grep -Eq 'cameraUv\.x[[:space:]]*=[[:space:]]*1\.0 - cameraUv\.x' "$root/src/ofApp.cpp"
-grep -Eq 'setUniform4f\("pathBounds"' "$root/src/ofApp.cpp"
-grep -Eq 'setUniform2f\("focusCenter"' "$root/src/ofApp.cpp"
-grep -Eq 'setUniform1f\("mirrorCamera",[[:space:]]*1\.0f\)' "$root/src/ofApp.cpp"
+test -f "$root/prueba_camara.code-workspace"
+! test -f "$root/template_of.code-workspace"
 ```
 
 Make it executable:
@@ -87,7 +75,7 @@ Run:
 bash /Users/alejoparinelli/facu/AM2/template_of/tests/camera_tracking_test.sh
 ```
 
-Expected: FAIL on `ofxOpenCv`, missing cascade, or missing OpenCV/crop symbols.
+Expected: FAIL on project basename, `ofxOpenCv`, missing cascade, or workspace rename.
 
 - [ ] **Step 3: Wire OpenCV and rename the project**
 
@@ -123,7 +111,7 @@ Run:
 bash /Users/alejoparinelli/facu/AM2/prueba_camara/tests/camera_tracking_test.sh
 ```
 
-Expected: still FAIL, now because C++ symbols and shader uniforms are not implemented yet.
+Expected: PASS.
 
 - [ ] **Step 5: Commit setup changes**
 
@@ -135,7 +123,7 @@ git -C /Users/alejoparinelli/facu/AM2/prueba_camara add -u template_of.code-work
 git -C /Users/alejoparinelli/facu/AM2/prueba_camara commit -m "chore: rename project and add camera tracking assets"
 ```
 
-Expected: commit succeeds. The test is allowed to remain red because later tasks implement the required code.
+Expected: commit succeeds with `camera_tracking_test.sh` green.
 
 ---
 
@@ -155,7 +143,18 @@ Expected: commit succeeds. The test is allowed to remain red because later tasks
   - `glm::vec2 path144CameraFocus` normalized to `[0, 1]`;
   - `bool path144FaceFinderReady`.
 
-- [ ] **Step 1: Confirm the test is red for C++ behavior**
+- [ ] **Step 1: Extend the test and verify it fails for tracking symbols**
+
+Append these checks to `/Users/alejoparinelli/facu/AM2/prueba_camara/tests/camera_tracking_test.sh`:
+
+```bash
+grep -Eq '#include "ofxCvHaarFinder\.h"' "$root/src/ofApp.h"
+grep -Eq 'ofxCvHaarFinder[[:space:]]+path144FaceFinder' "$root/src/ofApp.h"
+grep -Eq 'ofRectangle[[:space:]]+path144Bounds' "$root/src/ofApp.h"
+grep -Eq 'glm::vec2[[:space:]]+path144CameraFocus' "$root/src/ofApp.h"
+grep -Eq 'actualizarTrackingRostroPath144\(\)' "$root/src/ofApp.h" "$root/src/ofApp.cpp"
+grep -Eq 'path144FaceFinder\.findHaarObjects' "$root/src/ofApp.cpp"
+```
 
 Run:
 
@@ -391,7 +390,7 @@ void ofApp::actualizarTrackingRostroPath144() {
 }
 ```
 
-- [ ] **Step 6: Run test to verify partial pass**
+- [ ] **Step 6: Run test to verify tracking checks pass**
 
 Run:
 
@@ -399,7 +398,7 @@ Run:
 bash /Users/alejoparinelli/facu/AM2/prueba_camara/tests/camera_tracking_test.sh
 ```
 
-Expected: FAIL only on missing shader uniforms and uniform binding.
+Expected: PASS. Shader expectations are added in Task 3.
 
 - [ ] **Step 7: Commit tracking state and helpers**
 
@@ -410,7 +409,7 @@ git -C /Users/alejoparinelli/facu/AM2/prueba_camara add src/ofApp.h src/ofApp.cp
 git -C /Users/alejoparinelli/facu/AM2/prueba_camara commit -m "feat: add face tracking state for path camera"
 ```
 
-Expected: commit succeeds with the camera behavior test still red for shader work.
+Expected: commit succeeds with `camera_tracking_test.sh` green for setup and tracking behavior.
 
 ---
 
@@ -427,7 +426,21 @@ Expected: commit succeeds with the camera behavior test still red for shader wor
   - camera sampling using path-bounds target UV;
   - X-axis unmirror correction in both GLSL 150 and GLSL 120 shader variants.
 
-- [ ] **Step 1: Confirm the test is red for shader behavior**
+- [ ] **Step 1: Extend the test and verify it fails for shader behavior**
+
+Append these checks to `/Users/alejoparinelli/facu/AM2/prueba_camara/tests/camera_tracking_test.sh`:
+
+```bash
+grep -Eq 'uniform vec4 pathBounds' "$root/src/ofApp.cpp"
+grep -Eq 'uniform vec2 focusCenter' "$root/src/ofApp.cpp"
+grep -Eq 'uniform float mirrorCamera' "$root/src/ofApp.cpp"
+grep -Eq 'targetUv[[:space:]]*=[[:space:]]*clamp\(\(canvasPosition - pathBounds\.xy\) / pathBounds\.zw' "$root/src/ofApp.cpp"
+grep -Eq 'effectiveFocus\.x[[:space:]]*=[[:space:]]*1\.0 - effectiveFocus\.x' "$root/src/ofApp.cpp"
+grep -Eq 'cameraUv\.x[[:space:]]*=[[:space:]]*1\.0 - cameraUv\.x' "$root/src/ofApp.cpp"
+grep -Eq 'setUniform4f\("pathBounds"' "$root/src/ofApp.cpp"
+grep -Eq 'setUniform2f\("focusCenter"' "$root/src/ofApp.cpp"
+grep -Eq 'setUniform1f\("mirrorCamera",[[:space:]]*1\.0f\)' "$root/src/ofApp.cpp"
+```
 
 Run:
 
