@@ -26,7 +26,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/of
-          key: of-0.12.1-emscripten-emsdk-4.0.4-v3-nosourcemap
+          key: of-0.12.1-emscripten-emsdk-4.0.4-v5-nopthread-nosourcemap
 
       - name: Download openFrameworks source
         if: steps.of-cache.outputs.cache-hit != 'true'
@@ -64,6 +64,44 @@ jobs:
           # Remove source map - emscripten waits for .wasm.map before starting, causes hang on itch.io
           sed -i 's/-gsource-map//g' "$CFG"
           sed -i 's/-sLOAD_SOURCE_MAP=1//g' "$CFG"
+
+      - name: Patch oF shader logging to avoid ostream locale crash in Emscripten
+        run: |
+          python3 - <<'EOF'
+          import re
+
+          path = '/opt/of/libs/openFrameworks/gl/ofShader.cpp'
+          with open(path, 'r') as f:
+              src = f.read()
+
+          # These ostream << numeric calls crash in Emscripten: ctype<char>::do_widen
+          # uses a locale table that is not properly initialized in builds without pthread.
+          # Replace with printf-style ofLog calls that avoid locale-based formatting.
+          replacements = [
+              (
+                  'ofLogError("ofShader") << "checkProgramLinkStatus(): OpenGL generated error " << err << " trying to get the program link status, does your video card support shader programs?";',
+                  'ofLogError("ofShader", "checkProgramLinkStatus(): OpenGL generated error %u trying to get the program link status, does your video card support shader programs?", (unsigned)err);'
+              ),
+              (
+                  'ofLogVerbose("ofShader") << "checkProgramLinkStatus(): program " << program << " linked";',
+                  'ofLogVerbose("ofShader", "checkProgramLinkStatus(): program %u linked", (unsigned)program);'
+              ),
+              (
+                  'ofLogVerbose("ofShader") << "linkProgram(): attaching " << nameForType(it.first) << " shader to program " << program;',
+                  'ofLogVerbose("ofShader", "linkProgram(): attaching %s shader to program %u", nameForType(it.first).c_str(), (unsigned)program);'
+              ),
+          ]
+
+          for old, new in replacements:
+              if old in src:
+                  src = src.replace(old, new)
+                  print(f'Patched: {old[:60]}...')
+              else:
+                  print(f'WARNING: pattern not found: {old[:60]}...')
+
+          with open(path, 'w') as f:
+              f.write(src)
+          EOF
 
       - name: Patch oF random engine for Emscripten
         run: |
