@@ -65,6 +65,12 @@ jobs:
           sed -i 's/-gsource-map//g' "$CFG"
           sed -i 's/-sLOAD_SOURCE_MAP=1//g' "$CFG"
 
+      - name: Patch oF random engine for Emscripten
+        run: |
+          RNG=/opt/of/libs/openFrameworks/utils/ofRandomEngine.h
+          perl -0pi -e 's/#include <random>/#include <chrono>\n#include <random>/' "$RNG"
+          perl -0pi -e 's/std::random_device rd_ \{\};\n\tstd::seed_seq seq_ \{ rd_\(\), rd_\(\), rd_\(\), rd_\(\) \}; \/\/ 4 is considered fine for non-cryptographic needs\n\tstd::mt19937 gen_ \{ seq_ \};/#ifdef TARGET_EMSCRIPTEN\n\tstd::mt19937 gen_ { static_cast<std::mt19937::result_type>(std::chrono::steady_clock::now().time_since_epoch().count()) };\n#else\n\tstd::random_device rd_ {};\n\tstd::seed_seq seq_ { rd_(), rd_(), rd_(), rd_() }; \/\/ 4 is considered fine for non-cryptographic needs\n\tstd::mt19937 gen_ { seq_ };\n#endif/' "$RNG"
+
       - name: Compile openFrameworks core for Emscripten
         if: steps.of-cache.outputs.cache-hit != 'true'
         run: |
