@@ -26,7 +26,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/of
-          key: of-0.12.1-emscripten-emsdk-4.0.4-v1
+          key: of-0.12.1-emscripten-emsdk-4.0.4-v3-nosourcemap
 
       - name: Download openFrameworks source
         if: steps.of-cache.outputs.cache-hit != 'true'
@@ -55,10 +55,15 @@ jobs:
 
       - name: Patch oF emscripten config
         run: |
-          # reallocarray is provided by emscripten 4.x as a JS import at runtime,
-          # not resolved at link time — allow it to be undefined at link stage
-          sed -i 's/-sERROR_ON_UNDEFINED_SYMBOLS=1/-sERROR_ON_UNDEFINED_SYMBOLS=0/' \
-            /opt/of/libs/openFrameworksCompiled/project/emscripten/config.emscripten.default.mk
+          CFG=/opt/of/libs/openFrameworksCompiled/project/emscripten/config.emscripten.default.mk
+          # reallocarray resolved at runtime via emscripten JS
+          sed -i 's/-sERROR_ON_UNDEFINED_SYMBOLS=1/-sERROR_ON_UNDEFINED_SYMBOLS=0/' "$CFG"
+          # Remove pthread - requires SharedArrayBuffer/COOP+COEP headers not available on itch.io
+          sed -i 's/PLATFORM_PTHREAD = .*/PLATFORM_PTHREAD =/' "$CFG"
+          sed -i 's/CFLAG_PLATFORM_PTHREAD = .*/CFLAG_PLATFORM_PTHREAD =/' "$CFG"
+          # Remove source map - emscripten waits for .wasm.map before starting, causes hang on itch.io
+          sed -i 's/-gsource-map//g' "$CFG"
+          sed -i 's/-sLOAD_SOURCE_MAP=1//g' "$CFG"
 
       - name: Compile openFrameworks core for Emscripten
         if: steps.of-cache.outputs.cache-hit != 'true'
@@ -80,10 +85,13 @@ jobs:
       - name: Collect web output
         run: |
           mkdir _site
-          find bin -maxdepth 1 -type f \
-            \( -name "*.html" -o -name "*.js" -o -name "*.wasm" -o -name "*.data" \) \
+          # oF emscripten outputs to bin/em/<project_name>/
+          find bin/em -type f \
+            \( -name "*.html" -o -name "*.js" -o -name "*.wasm" -o -name "*.data" \
+               -o -name "*.css" -o -name ".htaccess" \) \
             -exec cp {} _site/ \;
-          cd _site && mv *.html index.html
+          ls -la bin/em/ || true
+          ls -la _site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -93,10 +101,25 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Download Pages artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: _site_tar
+
+      - name: Extract artifact
+        run: |
+          mkdir _site
+          tar -xf _site_tar/artifact.tar -C _site
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          chmod +x butler
+
+      - name: Deploy to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: ./butler push _site aparinelli/prueba-camara:html5
