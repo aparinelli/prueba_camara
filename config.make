@@ -79,7 +79,8 @@ OF_ROOT = /Users/alejoparinelli/facu/AM2/of_v0.12.1_osx_release
 # TODO: should this be a default setting?
 # PROJECT_LDFLAGS=-Wl,-rpath=./libs
 ifneq ($(findstring emcc,$(CC)),)
-PROJECT_LDFLAGS = -sASSERTIONS=1 -sGL_ASSERTIONS=1 -sMAX_WEBGL_VERSION=2
+PROJECT_CFLAGS = -fexceptions
+PROJECT_LDFLAGS = -fexceptions -sASSERTIONS=1 -sGL_ASSERTIONS=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2
 endif
 
 ################################################################################

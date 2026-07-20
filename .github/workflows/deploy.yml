@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/of
-          key: of-0.12.1-emscripten-emsdk-4.0.4-v3-pages
+          key: of-0.12.1-emscripten-emsdk-4.0.4-v4-webgl2-exceptions
 
       - name: Download openFrameworks source
         if: steps.of-cache.outputs.cache-hit != 'true'
@@ -65,9 +65,12 @@ jobs:
           # SharedArrayBuffer/COOP+COEP are not guaranteed for project Pages sites.
           sed -i 's/PLATFORM_PTHREAD = .*/PLATFORM_PTHREAD =/' "$CFG"
           sed -i 's/CFLAG_PLATFORM_PTHREAD = .*/CFLAG_PLATFORM_PTHREAD =/' "$CFG"
-          # Let browsers fall back to WebGL1 if WebGL2 context creation fails.
-          sed -i 's/-s MIN_WEBGL_VERSION=2//g' "$CFG"
-          sed -i 's/-sMIN_WEBGL_VERSION=2//g' "$CFG"
+          grep -q -- '-fexceptions' "$CFG" || {
+            printf '\nPLATFORM_CXXFLAGS += -fexceptions\n' >> "$CFG"
+            printf 'PLATFORM_LDFLAGS += -fexceptions\n' >> "$CFG"
+          }
+          grep -q 'MIN_WEBGL_VERSION=2' "$CFG" || \
+            printf '\nPLATFORM_LDFLAGS += -s MIN_WEBGL_VERSION=2\n' >> "$CFG"
           grep -q 'MAX_WEBGL_VERSION=2' "$CFG" || \
             printf '\nPLATFORM_LDFLAGS += -s MAX_WEBGL_VERSION=2\n' >> "$CFG"
           # Avoid source-map fetches delaying runtime start.
@@ -98,28 +101,14 @@ jobs:
               '\t((ofGLProgrammableRenderer*)_renderer.get())->setup(2,0);\n'
           )
           new_setup = (
-              '\tint rendererMajor = 2;\n'
-              '\tint rendererMinor = 0;\n'
-              '\tattrs.majorVersion = rendererMajor;\n'
-              '\tattrs.minorVersion = rendererMinor;\n'
+              '\tattrs.majorVersion = 2;\n'
+              '\tattrs.minorVersion = 0;\n'
               '\tattrs.alpha = 0;\n'
               '\n'
               '\tcontext = emscripten_webgl_create_context("#canvas", &attrs);\n'
               '\tif(context == 0){\n'
-              '\t\tattrs.antialias = 0;\n'
-              '\t\tattrs.stencil = 0;\n'
-              '\t\tcontext = emscripten_webgl_create_context("#canvas", &attrs);\n'
-              '\t}\n'
-              '\tif(context == 0){\n'
-              '\t\trendererMajor = 1;\n'
-              '\t\trendererMinor = 0;\n'
-              '\t\tattrs.majorVersion = rendererMajor;\n'
-              '\t\tattrs.minorVersion = rendererMinor;\n'
-              '\t\tcontext = emscripten_webgl_create_context("#canvas", &attrs);\n'
-              '\t}\n'
-              '\tif(context == 0){\n'
               '\t\tEM_ASM({\n'
-              '\t\t\tconsole.error("openFrameworks failed to create a WebGL context for #canvas");\n'
+              '\t\t\tconsole.error("openFrameworks failed to create a WebGL2 context for #canvas");\n'
               '\t\t});\n'
               '\t\tstd::abort();\n'
               '\t}\n'
@@ -133,11 +122,11 @@ jobs:
               '\t}\n'
               '\n'
               '\t_renderer = std::make_shared<ofGLProgrammableRenderer>(this);\n'
-              '\t((ofGLProgrammableRenderer*)_renderer.get())->setup(rendererMajor, rendererMinor);\n'
+              '\t((ofGLProgrammableRenderer*)_renderer.get())->setup(2,0);\n'
           )
           if old_setup in src:
               src = src.replace(old_setup, new_setup)
-          elif 'rendererMajor = 1' not in src:
+          elif 'failed to create a WebGL2 context' not in src:
               raise SystemExit('Could not patch ofxAppEmscriptenWindow::setup WebGL context handling')
 
           old_make_current = (
@@ -268,13 +257,13 @@ jobs:
 
           path = Path("_site/index.js")
           js = path.read_text()
-          old = 'var findEventTarget=target=>{target=maybeCStringToJsString(target);var domElement=specialHTMLTargets[target]||(typeof document!="undefined"?document.querySelector(target):null);return domElement}'
-          new = 'var findEventTarget=target=>{target=maybeCStringToJsString(target);if(target === "" && typeof document!=="undefined"){return document.querySelector("#canvas")}var domElement=specialHTMLTargets[target]||(typeof document!=="undefined"?document.querySelector(target):null);return domElement}'
+          old = 'var findCanvasEventTarget=findEventTarget;Module["findCanvasEventTarget"]=findCanvasEventTarget;'
+          new = 'var findCanvasEventTarget=target=>Module["canvas"]||(typeof document!="undefined"?document.getElementById("canvas"):null);Module["findCanvasEventTarget"]=findCanvasEventTarget;'
 
           if old in js:
               js = js.replace(old, new)
-          elif 'target === ""' not in js:
-              raise SystemExit("Could not patch generated Emscripten target lookup")
+          elif 'document.getElementById("canvas")' not in js:
+              raise SystemExit("Could not patch generated Emscripten canvas target lookup")
 
           path.write_text(js)
           EOF
