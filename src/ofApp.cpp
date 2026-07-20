@@ -188,6 +188,7 @@ ofRectangle calcularBoundsPath(const ofPath& path) {
     return ofRectangle(minX, minY, maxX - minX, maxY - minY);
 }
 
+#ifndef TARGET_EMSCRIPTEN
 ofRectangle elegirCaraPrincipal(const std::vector<ofxCvBlob>& blobs) {
     ofRectangle mejor;
     float mejorArea = 0.0f;
@@ -200,6 +201,7 @@ ofRectangle elegirCaraPrincipal(const std::vector<ofxCvBlob>& blobs) {
     }
     return mejor;
 }
+#endif
 
 void cargarShader(ofShader& shader, const std::string& vertex, const std::string& fragment, bool bindDefaults) {
     shader.setupShaderFromSource(GL_VERTEX_SHADER, vertex);
