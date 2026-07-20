@@ -280,6 +280,7 @@ jobs:
         run: |
           docker exec em bash -c '
             cd /project
+            sed -i "/^ofxOpenCv$/d" addons.make
             emmake make OF_ROOT=/opt/of -j$(nproc) Release
           '
 
