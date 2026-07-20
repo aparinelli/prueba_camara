@@ -65,6 +65,9 @@ jobs:
           # SharedArrayBuffer/COOP+COEP are not guaranteed for project Pages sites.
           sed -i 's/PLATFORM_PTHREAD = .*/PLATFORM_PTHREAD =/' "$CFG"
           sed -i 's/CFLAG_PLATFORM_PTHREAD = .*/CFLAG_PLATFORM_PTHREAD =/' "$CFG"
+          # ofxAppEmscriptenWindow asks for WebGL2; avoid silently falling back to WebGL1.
+          grep -q 'MIN_WEBGL_VERSION=2' "$CFG" || \
+            printf '\nPLATFORM_LDFLAGS += -s MIN_WEBGL_VERSION=2\n' >> "$CFG"
           # Avoid source-map fetches delaying runtime start.
           sed -i 's/-gsource-map//g' "$CFG"
           sed -i 's/-sLOAD_SOURCE_MAP=1//g' "$CFG"
@@ -133,15 +136,52 @@ jobs:
             mv "$html_file" _site/index.html
           fi
 
-      - name: Patch generated Emscripten HTML bootstrap
+      - name: Normalize generated Emscripten HTML bootstrap
         run: |
-          # app.js defines Module.canvas; keep it ordered ahead of index.js startup.
-          perl -0pi -e 's/<script async type="text\/javascript" src="app\.js"><\/script>/<script type="text\/javascript" src="app.js"><\/script>/' _site/index.html
-          perl -0pi -e 's/<script async type="text\/javascript" src="index\.js"><\/script>/<script type="text\/javascript" src="index.js"><\/script>/' _site/index.html
+          python3 - <<'EOF'
+          from pathlib import Path
+          import re
+
+          path = Path("_site/index.html")
+          html = path.read_text()
+
+          html = re.sub(
+              r'\s*<script(?:\s+async)?\s+type="text/javascript"\s+src="(?:app|index)\.js"></script>',
+              '',
+              html,
+          )
+
+          bootstrap = '''    <script type="text/javascript" src="app.js"></script>
+              <script>
+                window.Module = typeof Module !== "undefined" ? Module : (window.Module || {});
+                Module.canvas = Module.canvas || document.getElementById("canvas");
+              </script>
+              <script type="text/javascript" src="index.js"></script>
+          '''
+
+          if "  </body>" not in html:
+              raise SystemExit("Could not find closing body tag in generated Emscripten HTML")
+
+          path.write_text(html.replace("  </body>", bootstrap + "  </body>"))
+          EOF
 
       - name: Patch generated Emscripten target lookup
         run: |
-          perl -0pi -e 's/var findEventTarget=target=>\{target=maybeCStringToJsString\(target\);var domElement=specialHTMLTargets\[target\]\|\|\(typeof document!=\"undefined\"\?document\.querySelector\(target\):null\);return domElement\}/var findEventTarget=target=>{target=maybeCStringToJsString(target);if(target === \"\" && typeof document!==\"undefined\"){return document.querySelector(\"#canvas\")}var domElement=specialHTMLTargets[target]||(typeof document!==\"undefined\"?document.querySelector(target):null);return domElement}/' _site/index.js
+          python3 - <<'EOF'
+          from pathlib import Path
+
+          path = Path("_site/index.js")
+          js = path.read_text()
+          old = 'var findEventTarget=target=>{target=maybeCStringToJsString(target);var domElement=specialHTMLTargets[target]||(typeof document!="undefined"?document.querySelector(target):null);return domElement}'
+          new = 'var findEventTarget=target=>{target=maybeCStringToJsString(target);if(target === "" && typeof document!=="undefined"){return document.querySelector("#canvas")}var domElement=specialHTMLTargets[target]||(typeof document!=="undefined"?document.querySelector(target):null);return domElement}'
+
+          if old in js:
+              js = js.replace(old, new)
+          elif 'target === ""' not in js:
+              raise SystemExit("Could not patch generated Emscripten target lookup")
+
+          path.write_text(js)
+          EOF
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

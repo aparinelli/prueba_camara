@@ -231,8 +231,16 @@ void ofApp::configurarPath144Shader() {
 }
 
 void ofApp::configurarPath144Camara() {
+    path144MaskFbo.allocate(SVG_W, SVG_H, GL_RGBA);
+    path144BlurFbo[0].allocate(SVG_W, SVG_H, GL_RGBA);
+    path144BlurFbo[1].allocate(SVG_W, SVG_H, GL_RGBA);
+
+#ifdef TARGET_EMSCRIPTEN
+    path144CameraReady = false;
+#else
     seleccionarDispositivoCamaraPath144();
     configurarRecursosCamaraPath144();
+#endif
     configurarDetectorRostroPath144();
 #ifndef TARGET_EMSCRIPTEN
     configurarPath144CamaraShaders();
@@ -279,10 +287,6 @@ void ofApp::configurarRecursosCamaraPath144() {
     path144Camera.setDesiredFrameRate(30);
     path144Camera.setup(1280, 720);
     path144CameraReady = path144Camera.isInitialized();
-
-    path144MaskFbo.allocate(SVG_W, SVG_H, GL_RGBA);
-    path144BlurFbo[0].allocate(SVG_W, SVG_H, GL_RGBA);
-    path144BlurFbo[1].allocate(SVG_W, SVG_H, GL_RGBA);
 }
 
 void ofApp::configurarDetectorRostroPath144() {
