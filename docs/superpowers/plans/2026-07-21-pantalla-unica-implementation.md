@@ -14,6 +14,8 @@
 - Keep title font `bin/data/fonts/CaslonCPswash.otf`.
 - Keep prompt font `bin/data/fonts/Arial.ttf`.
 - Keep prompt animation name `pulse`.
+- Load fonts with `ofTrueTypeFontSettings` and `ofAlphabet::Latin`.
+- Draw three scenes with lower text.
 - Original repo Pages must not deploy from `demo`.
 - New publication must use a separate Pages site.
 
@@ -55,6 +57,10 @@ Keep only font fields, `startScreenActive`, `configurarPantallaInicio()`, and `d
 - [x] **Step 2: Draw one screen**
 
 Draw `Prueba Cámara`, `Apretá`, a rounded `Enter` key, and `para empezar` with alpha from `pulse`.
+
+- [x] **Step 2b: Add clickable start and scenes**
+
+Replace the prompt with a clickable `Empezar` button, load Latin glyph ranges, and add three scenes with bottom captions and per-letter animation.
 
 - [x] **Step 3: Restore original Pages trigger**
 

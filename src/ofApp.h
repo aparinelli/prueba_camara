@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include <vector>
 
 class ofApp : public ofBaseApp {
 public:
@@ -16,10 +17,20 @@ public:
     void mouseReleased(int x, int y, int button);
 
 private:
+    struct Scene {
+        std::string title;
+        std::string caption;
+    };
+
     ofTrueTypeFont startTitleFont;
     ofTrueTypeFont startPromptFont;
+    std::vector<Scene> scenes;
+    ofRectangle startButtonBounds;
+    int currentScene = 0;
     bool startScreenActive = true;
 
     void configurarPantallaInicio();
     void dibujarPantallaInicio();
+    void dibujarEscenaActual();
+    void avanzarEscena();
 };
