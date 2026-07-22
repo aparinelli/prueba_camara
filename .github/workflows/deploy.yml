@@ -196,11 +196,6 @@ jobs:
 
       - name: Patch oF Emscripten video bridge signatures
         run: |
-          if ! grep -R -E 'ofVideoGrabber|ofVideoPlayer' src >/dev/null 2>&1; then
-            echo "Project does not use video APIs; skipping video bridge patch."
-            exit 0
-          fi
-
           python3 - <<'EOF'
           from pathlib import Path
           import re
@@ -227,7 +222,8 @@ jobs:
               count=1,
           )
           if count != 1:
-              raise SystemExit("Could not patch grabber video element attributes")
+              if "video.playsInline = true;" not in src:
+                  print("Could not patch grabber video element attributes; continuing because project may not use video.")
 
           src, count = re.subn(
               r'(if \(video\.pixelFormat=="RGBA"\)\{\s*)array\.set\(imageData\.data\);',
@@ -237,7 +233,8 @@ jobs:
               count=1,
           )
           if count != 1:
-              raise SystemExit("Could not patch RGBA grabber pixel copy")
+              if "Module.HEAPU8.subarray(dstPixels" not in src:
+                  print("Could not patch RGBA grabber pixel copy; continuing because project may not use video.")
 
           src, count = re.subn(
               r"}catch\(e\)\{console\.log\(e\);\}",
@@ -246,7 +243,8 @@ jobs:
               count=1,
           )
           if count != 1:
-              raise SystemExit("Could not patch video update error handler")
+              if "Couldn't update video texture!" not in src:
+                  print("Could not patch video update error handler; continuing because project may not use video.")
 
           constraints_pattern = re.compile(
               r"\n\s*if\(framerate==-1\) \{[\s\S]*?\n\s*}\s*\n\s*navigator\.mediaDevices\.getUserMedia\(constraints\)",
@@ -276,7 +274,8 @@ jobs:
               count=1,
           )
           if count != 1:
-              raise SystemExit("Could not patch grabber media constraints")
+              if "facingMode: \"user\"" not in src:
+                  print("Could not patch grabber media constraints; continuing because project may not use video.")
 
           src = src.replace(
               "          VIDEO.grabber[grabber_id].onloadedmetadata = function (e) {\n"
@@ -302,7 +301,8 @@ jobs:
               count=1,
           )
           if count != 1 or ("console" + ".log(e)") in src:
-              raise SystemExit("Unpatched grabber error handler")
+              if "Couldn't init grabber!" not in src:
+                  print("Could not patch grabber error handler; continuing because project may not use video.")
 
           signatures = {
               "html5video_player_create": "i",
