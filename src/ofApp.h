@@ -10,6 +10,7 @@ public:
 
     void keyPressed(int key);
     void keyReleased(int key);
+    // No esta en el md: eventos de mouse extra que quedan vacios para mantener la plantilla OF.
     void mouseMoved(int x, int y);
     void mouseDragged(int x, int y, int button);
     void mousePressed(int x, int y, int button);

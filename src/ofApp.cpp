@@ -3,8 +3,10 @@
 ///////////////////////////////////////////////////////////////////////////
 void ofApp::setup()
 {
+  // No esta en el md: ofSetWindowTitle() solo cambia el titulo de la ventana.
   ofSetWindowTitle("Apuestas");
   ofSetWindowShape(960, 540);
+  // No esta en el md: ofSetFrameRate() fija la velocidad de dibujo.
   ofSetFrameRate(60);
 
   pantalla_completa = false;
@@ -107,6 +109,7 @@ void ofApp::update()
 ///////////////////////////////////////////////////////////////////////////
 void ofApp::draw()
 {
+  // No esta en el md: ofBackground() limpia la pantalla antes de dibujar cada frame.
   ofBackground(255);
 
   if (!pantalla_completa) ofScale(0.5, 0.5);
@@ -162,6 +165,7 @@ void ofApp::dibujarEscenaActual()
   if (escena_actual == 3)
   {
     dibujarInterfazApuestas();
+    // No esta en el md: return corta aca porque la escena 4 se dibuja completa aparte.
     return;
   }
 
@@ -242,6 +246,7 @@ void ofApp::dibujarInterfazApuestas()
   }
 
   ofSetColor(20, 95, 220);
+  // No esta en el md: ofSetLineWidth() engrosa la curva del grafico.
   ofSetLineWidth(6);
   ofBeginShape();
   for (int i = 0; i <= 80; i++)
@@ -253,6 +258,7 @@ void ofApp::dibujarInterfazApuestas()
     ofVertex(x, y);
   }
   ofEndShape(false);
+  // No esta en el md: ofSetLineWidth() vuelve al grosor normal para el resto del dibujo.
   ofSetLineWidth(1);
 
   ofSetColor(0);
@@ -289,14 +295,17 @@ void ofApp::dibujarTextoAnimado(string texto, float y)
 {
   float ancho_texto = 0;
 
+  // No esta en el md: length() recorre la cantidad de caracteres del texto.
   for (int i = 0; i < texto.length(); i++)
   {
+    // No esta en el md: substr() toma una letra para poder animarla por separado.
     string letra = texto.substr(i, 1);
     ancho_texto += anchoTextoConFallback(letra);
   }
 
   float x = ancho / 2 - ancho_texto / 2;
 
+  // No esta en el md: se repite length() y substr() para dibujar letra por letra.
   for (int i = 0; i < texto.length(); i++)
   {
     string letra = texto.substr(i, 1);
@@ -408,6 +417,7 @@ void ofApp::mousePressed(int x, int y, int button)
       y <= posicion_boton.y + alto_boton)
   {
     startScreenActive = false;
+    // No esta en el md: return evita que el mismo click tambien avance de escena.
     return;
   }
 
@@ -418,6 +428,7 @@ void ofApp::mousePressed(int x, int y, int button)
       y <= posicion_boton_anterior.y + alto_boton)
   {
     retrocederEscena();
+    // No esta en el md: return deja el click resuelto en este boton.
     return;
   }
 
@@ -428,6 +439,7 @@ void ofApp::mousePressed(int x, int y, int button)
       y <= posicion_boton_siguiente.y + alto_boton)
   {
     avanzarEscena();
+    // No esta en el md: return deja el click resuelto en este boton.
     return;
   }
 
