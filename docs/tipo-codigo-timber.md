@@ -29,7 +29,9 @@ Este proyecto queda refactorizado para usar el mismo tipo de codigo que aparece 
 ## Reglas para este refactor
 
 - La resolucion de ventana sigue el ejemplo Timber: `960 x 540`.
-- Las coordenadas de diseno trabajan en `1920 x 1080` y se dibujan con `ofScale(0.5, 0.5)` cuando no hay pantalla completa.
+- Las coordenadas de diseno trabajan en `1920 x 1080`, como Timber.
+- Timber escala con `ofScale(0.5, 0.5)` en ventana y deja fullscreen al 100%, pero ese ejemplo aclara que fullscreen depende de tener monitor `1920 x 1080`.
+- Para que fullscreen tambien calce en otras pantallas, este proyecto calcula la escala con el ancho y alto reales de la ventana. Esa parte queda comentada en el codigo porque sale del repertorio Timber base.
 - Las escenas se guardan en arreglos fijos, actualmente de 4 posiciones.
 - El texto se centra con `stringWidth()`.
 - Las tildes se sostienen cargando las fuentes con `load("archivo.ttf", tamano, true, true)`, usando el set completo de caracteres.

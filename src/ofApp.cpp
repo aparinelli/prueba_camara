@@ -19,10 +19,10 @@ void ofApp::setup()
 ///////////////////////////////////////////////////////////////////////////
 void ofApp::configurarPantallaInicio()
 {
-  fuente_titulo.load("fonts/CaslonCPswash.otf", 88, true, true);
-  fuente_titulo_fallback.load("fonts/Arial.ttf", 88, true, true);
-  fuente_texto.load("fonts/Arial.ttf", 52, true, true);
-  fuente_texto_chico.load("fonts/Arial.ttf", 34, true, true);
+  fuente_titulo.load("fonts/CaslonCPswash.otf", 70, true, true);
+  fuente_titulo_fallback.load("fonts/Arial.ttf", 70, true, true);
+  fuente_texto.load("fonts/Arial.ttf", 40, true, true);
+  fuente_texto_chico.load("fonts/Arial.ttf", 25, true, true);
 
   titulo_juego = "Prueba Cámara";
 
@@ -112,7 +112,10 @@ void ofApp::draw()
   // No esta en el md: ofBackground() limpia la pantalla antes de dibujar cada frame.
   ofBackground(255);
 
-  if (!pantalla_completa) ofScale(0.5, 0.5);
+  // No esta en el md: ofGetWidth() y ofGetHeight() leen el tamano real de la ventana.
+  float escala_x = ofGetWidth() / ancho;
+  float escala_y = ofGetHeight() / alto;
+  ofScale(escala_x, escala_y);
 
   if (startScreenActive)
   {
@@ -406,11 +409,11 @@ void ofApp::mouseDragged(int x, int y, int button)
 ///////////////////////////////////////////////////////////////////////////
 void ofApp::mousePressed(int x, int y, int button)
 {
-  if (!pantalla_completa)
-  {
-    x = x * 2;
-    y = y * 2;
-  }
+  // No esta en el md: ofGetWidth() y ofGetHeight() convierten el mouse a coordenadas 1920x1080.
+  float escala_x = ofGetWidth() / ancho;
+  float escala_y = ofGetHeight() / alto;
+  x = x / escala_x;
+  y = y / escala_y;
 
   if (startScreenActive &&
       x >= posicion_boton.x &&
