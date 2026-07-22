@@ -18,6 +18,7 @@ if command -v ruby >/dev/null; then
   ruby -e 'require "yaml"; YAML.load_file(ARGV[0])' "$workflow"
 fi
 grep -Eq 'actions/configure-pages@v5' "$workflow"
+grep -Eq 'enablement: true' "$workflow"
 grep -Eq 'actions/upload-pages-artifact@v3' "$workflow"
 grep -Eq 'actions/deploy-pages@v4' "$workflow"
 grep -Eq 'find bin/em -type f' "$workflow"
