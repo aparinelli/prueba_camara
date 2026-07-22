@@ -19,10 +19,10 @@ void ofApp::setup()
 ///////////////////////////////////////////////////////////////////////////
 void ofApp::configurarPantallaInicio()
 {
-  fuente_titulo.load("fonts/CaslonCPswash.otf", 70, true, true);
-  fuente_titulo_fallback.load("fonts/Arial.ttf", 70, true, true);
-  fuente_texto.load("fonts/Arial.ttf", 40, true, true);
-  fuente_texto_chico.load("fonts/Arial.ttf", 25, true, true);
+  fuente_titulo.load("fonts/CaslonCPswash.otf", 64, true, true);
+  fuente_titulo_fallback.load("fonts/Arial.ttf", 64, true, true);
+  fuente_texto.load("fonts/Arial.ttf", 32, true, true);
+  fuente_texto_chico.load("fonts/Arial.ttf", 19, true, true);
 
   titulo_juego = "Prueba Cámara";
 
@@ -57,22 +57,22 @@ void ofApp::configurarPantallaInicio()
   textos_escenas[2] = "Tercera escena: el pulso se queda.";
   textos_escenas[3] = "Noticias, chat y modelo de crecimiento.";
 
-  noticias_apuestas[0] = "Ganadores de apuestas: premios altos.";
-  noticias_apuestas[1] = "Noticias generales: suben las visitas.";
-  noticias_apuestas[2] = "Tragedias relacionadas: familias piden control.";
+  noticias_apuestas[0] = "Ganadores: premios altos.";
+  noticias_apuestas[1] = "Generales: suben visitas.";
+  noticias_apuestas[2] = "Tragedias: piden control.";
 
-  mensajes_chat[0] = "lucas_22: duplique con una combinada";
-  mensajes_chat[1] = "mar: dato para el partido?";
-  mensajes_chat[2] = "toto: me recomienda seguir";
+  mensajes_chat[0] = "lucas_22: duplique";
+  mensajes_chat[1] = "mar: dato para hoy?";
+  mensajes_chat[2] = "toto: me dice seguir";
   mensajes_chat[3] = "ana: no puedo parar";
-  mensajes_chat[4] = "maxi: entre por una promo";
-  mensajes_chat[5] = "bot: nuevo bono disponible";
+  mensajes_chat[4] = "maxi: entre por promo";
+  mensajes_chat[5] = "bot: bono disponible";
 
-  ancho_boton = 300;
-  alto_boton = 86;
+  ancho_boton = 255;
+  alto_boton = 76;
   posicion_boton.set(ancho / 2 - ancho_boton / 2, 640);
-  posicion_boton_anterior.set(1630, 700);
-  posicion_boton_siguiente.set(1630, 810);
+  posicion_boton_anterior.set(1608, 700);
+  posicion_boton_siguiente.set(1608, 810);
   alpha_boton = 150;
   sube_alpha_boton = true;
 }
@@ -156,7 +156,7 @@ void ofApp::dibujarPantallaInicio()
 
   string texto_boton = "Empezar";
   float boton_texto_x = posicion_boton.x + ancho_boton / 2 - fuente_texto.stringWidth(texto_boton) / 2;
-  float boton_texto_y = posicion_boton.y + 58;
+  float boton_texto_y = posicion_boton.y + 52;
   ofSetColor(20, 22, 26, alpha_boton);
   fuente_texto.drawString(texto_boton, boton_texto_x, boton_texto_y);
 
@@ -189,47 +189,38 @@ void ofApp::dibujarInterfazApuestas()
   ofSetColor(20, 22, 26);
   ofDrawRectangle(0, 0, ancho, alto);
 
-  ofSetColor(166, 226, 46);
-  fuente_texto.drawString("Apartado de noticias", 370, 90);
-
   for (int i = 0; i < 3; i++)
   {
-    float caja_x = 360 + i * 400;
+    float caja_x = 390 + i * 390;
     ofSetColor(28, 30, 36);
-    ofDrawRectangle(caja_x, 125, 360, 160);
+    ofDrawRectangle(caja_x, 90, 340, 140);
     ofSetColor(74, 69, 82);
-    ofDrawRectangle(caja_x, 125, 360, 4);
-    ofDrawRectangle(caja_x, 281, 360, 4);
-    ofDrawRectangle(caja_x, 125, 4, 160);
-    ofDrawRectangle(caja_x + 356, 125, 4, 160);
+    ofDrawRectangle(caja_x, 90, 340, 4);
+    ofDrawRectangle(caja_x, 226, 340, 4);
+    ofDrawRectangle(caja_x, 90, 4, 140);
+    ofDrawRectangle(caja_x + 336, 90, 4, 140);
     ofSetColor(255, 107, 74);
-    fuente_texto_chico.drawString(noticias_apuestas[i], caja_x + 18, 185);
+    fuente_texto_chico.drawString(noticias_apuestas[i], caja_x + 18, 160);
   }
 
-  ofSetColor(166, 226, 46);
-  fuente_texto.drawString("Chat automatizado", 45, 120);
-
   ofSetColor(28, 30, 36);
-  ofDrawRectangle(35, 150, 300, 830);
+  ofDrawRectangle(35, 90, 300, 890);
   ofSetColor(74, 69, 82);
-  ofDrawRectangle(35, 150, 300, 4);
+  ofDrawRectangle(35, 90, 300, 4);
   ofDrawRectangle(35, 976, 300, 4);
-  ofDrawRectangle(35, 150, 4, 830);
-  ofDrawRectangle(331, 150, 4, 830);
+  ofDrawRectangle(35, 90, 4, 890);
+  ofDrawRectangle(331, 90, 4, 890);
 
   for (int i = 0; i < 6; i++)
   {
     ofSetColor(74, 69, 82);
-    ofDrawRectangle(55, 190 + i * 120, 260, 82);
+    ofDrawRectangle(55, 140 + i * 125, 260, 74);
     ofSetColor(166, 226, 46);
-    fuente_texto_chico.drawString(mensajes_chat[i], 70, 242 + i * 120);
+    fuente_texto_chico.drawString(mensajes_chat[i], 70, 187 + i * 125);
   }
 
-  ofSetColor(166, 226, 46);
-  fuente_texto.drawString("Crecimiento cuadrático", 595, 370);
-
   float origen_x = 450;
-  float origen_y = 900;
+  float origen_y = 910;
   float ancho_grafico = 980;
   float alto_grafico = 480;
 
@@ -271,29 +262,26 @@ void ofApp::dibujarInterfazApuestas()
   ofSetColor(255, 107, 74);
   fuente_texto.drawString("y = x2", origen_x + ancho_grafico - 170, origen_y - alto_grafico + 60);
 
-  ofSetColor(166, 226, 46);
-  fuente_texto.drawString("Presentador", 1605, 120);
-
   ofSetColor(28, 30, 36);
-  ofDrawRectangle(1585, 150, 300, 830);
+  ofDrawRectangle(1585, 90, 300, 890);
   ofSetColor(74, 69, 82);
-  ofDrawRectangle(1585, 150, 300, 4);
+  ofDrawRectangle(1585, 90, 300, 4);
   ofDrawRectangle(1585, 976, 300, 4);
-  ofDrawRectangle(1585, 150, 4, 830);
-  ofDrawRectangle(1881, 150, 4, 830);
+  ofDrawRectangle(1585, 90, 4, 890);
+  ofDrawRectangle(1881, 90, 4, 890);
 
   ofSetColor(255, 107, 74);
-  fuente_texto.drawString("Entrada", 1640, 245);
-  ofDrawLine(1640, 280, 1800, 280);
-  fuente_texto.drawString("Salida", 1640, 405);
-  ofDrawLine(1640, 440, 1800, 440);
+  fuente_texto.drawString("Entrada", 1645, 210);
+  ofDrawLine(1645, 245, 1800, 245);
+  fuente_texto.drawString("Salida", 1645, 340);
+  ofDrawLine(1645, 375, 1800, 375);
 
   ofSetColor(255, 107, 74);
   ofDrawRectangle(posicion_boton_anterior, ancho_boton, alto_boton);
   ofDrawRectangle(posicion_boton_siguiente, ancho_boton, alto_boton);
   ofSetColor(20, 22, 26);
-  fuente_texto.drawString("Anterior", posicion_boton_anterior.x + 48, posicion_boton_anterior.y + 58);
-  fuente_texto.drawString("Siguiente", posicion_boton_siguiente.x + 35, posicion_boton_siguiente.y + 58);
+  fuente_texto.drawString("Anterior", 1640, 750);
+  fuente_texto.drawString("Siguiente", 1632, 860);
 
   ofSetColor(166, 226, 46);
 }
