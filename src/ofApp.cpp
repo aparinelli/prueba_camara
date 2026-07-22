@@ -110,7 +110,7 @@ void ofApp::update()
 void ofApp::draw()
 {
   // No esta en el md: ofBackground() limpia la pantalla antes de dibujar cada frame.
-  ofBackground(255);
+  ofBackground(20, 22, 26);
 
   // No esta en el md: ofGetWidth() y ofGetHeight() leen el tamano real de la ventana.
   float escala_x = ofGetWidth() / ancho;
@@ -145,10 +145,10 @@ void ofApp::dibujarPantallaInicio()
     posicion_x += anchoTextoConFallback(titulo_letras[i]);
   }
 
-  ofSetColor(255, alpha_boton);
+  ofSetColor(255, 107, 74, alpha_boton);
   ofDrawRectangle(posicion_boton, ancho_boton, alto_boton);
 
-  ofSetColor(0, alpha_boton);
+  ofSetColor(166, 226, 46, alpha_boton);
   ofDrawRectangle(posicion_boton.x, posicion_boton.y, ancho_boton, 4);
   ofDrawRectangle(posicion_boton.x, posicion_boton.y + alto_boton - 4, ancho_boton, 4);
   ofDrawRectangle(posicion_boton.x, posicion_boton.y, 4, alto_boton);
@@ -157,9 +157,10 @@ void ofApp::dibujarPantallaInicio()
   string texto_boton = "Empezar";
   float boton_texto_x = posicion_boton.x + ancho_boton / 2 - fuente_texto.stringWidth(texto_boton) / 2;
   float boton_texto_y = posicion_boton.y + 58;
+  ofSetColor(20, 22, 26, alpha_boton);
   fuente_texto.drawString(texto_boton, boton_texto_x, boton_texto_y);
 
-  ofSetColor(255);
+  ofSetColor(166, 226, 46);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -177,39 +178,40 @@ void ofApp::dibujarEscenaActual()
   string texto = textos_escenas[escena_actual];
   float texto_x = ancho / 2 - fuente_texto.stringWidth(texto) / 2;
 
-  ofSetColor(0);
+  ofSetColor(255, 107, 74);
   fuente_texto.drawString(texto, texto_x, alto - 160);
-  ofSetColor(255);
+  ofSetColor(166, 226, 46);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 void ofApp::dibujarInterfazApuestas()
 {
-  ofSetColor(248);
+  ofSetColor(20, 22, 26);
   ofDrawRectangle(0, 0, ancho, alto);
 
-  ofSetColor(0);
+  ofSetColor(166, 226, 46);
   fuente_texto.drawString("Apartado de noticias", 370, 90);
 
   for (int i = 0; i < 3; i++)
   {
     float caja_x = 360 + i * 400;
-    ofSetColor(255);
+    ofSetColor(28, 30, 36);
     ofDrawRectangle(caja_x, 125, 360, 160);
-    ofSetColor(0);
+    ofSetColor(74, 69, 82);
     ofDrawRectangle(caja_x, 125, 360, 4);
     ofDrawRectangle(caja_x, 281, 360, 4);
     ofDrawRectangle(caja_x, 125, 4, 160);
     ofDrawRectangle(caja_x + 356, 125, 4, 160);
+    ofSetColor(255, 107, 74);
     fuente_texto_chico.drawString(noticias_apuestas[i], caja_x + 18, 185);
   }
 
-  ofSetColor(0);
+  ofSetColor(166, 226, 46);
   fuente_texto.drawString("Chat automatizado", 45, 120);
 
-  ofSetColor(255);
+  ofSetColor(28, 30, 36);
   ofDrawRectangle(35, 150, 300, 830);
-  ofSetColor(0);
+  ofSetColor(74, 69, 82);
   ofDrawRectangle(35, 150, 300, 4);
   ofDrawRectangle(35, 976, 300, 4);
   ofDrawRectangle(35, 150, 4, 830);
@@ -217,13 +219,13 @@ void ofApp::dibujarInterfazApuestas()
 
   for (int i = 0; i < 6; i++)
   {
-    ofSetColor(235);
+    ofSetColor(74, 69, 82);
     ofDrawRectangle(55, 190 + i * 120, 260, 82);
-    ofSetColor(0);
+    ofSetColor(166, 226, 46);
     fuente_texto_chico.drawString(mensajes_chat[i], 70, 242 + i * 120);
   }
 
-  ofSetColor(0);
+  ofSetColor(166, 226, 46);
   fuente_texto.drawString("Crecimiento cuadrático", 595, 370);
 
   float origen_x = 450;
@@ -231,10 +233,10 @@ void ofApp::dibujarInterfazApuestas()
   float ancho_grafico = 980;
   float alto_grafico = 480;
 
-  ofSetColor(255);
+  ofSetColor(28, 30, 36);
   ofDrawRectangle(origen_x - 50, origen_y - alto_grafico - 40, ancho_grafico + 110, alto_grafico + 95);
 
-  ofSetColor(0);
+  ofSetColor(166, 226, 46);
   ofDrawLine(origen_x, origen_y, origen_x + ancho_grafico, origen_y);
   ofDrawLine(origen_x, origen_y, origen_x, origen_y - alto_grafico);
 
@@ -248,7 +250,7 @@ void ofApp::dibujarInterfazApuestas()
     fuente_texto_chico.drawString(ofToString(i), origen_x - 55, marca_y + 18);
   }
 
-  ofSetColor(20, 95, 220);
+  ofSetColor(107, 47, 191);
   // No esta en el md: ofSetLineWidth() engrosa la curva del grafico.
   ofSetLineWidth(6);
   for (int i = 0; i < 80; i++)
@@ -266,33 +268,34 @@ void ofApp::dibujarInterfazApuestas()
   // No esta en el md: ofSetLineWidth() vuelve al grosor normal para el resto del dibujo.
   ofSetLineWidth(1);
 
-  ofSetColor(0);
+  ofSetColor(255, 107, 74);
   fuente_texto.drawString("y = x2", origen_x + ancho_grafico - 170, origen_y - alto_grafico + 60);
 
-  ofSetColor(0);
+  ofSetColor(166, 226, 46);
   fuente_texto.drawString("Presentador", 1605, 120);
 
-  ofSetColor(255);
+  ofSetColor(28, 30, 36);
   ofDrawRectangle(1585, 150, 300, 830);
-  ofSetColor(0);
+  ofSetColor(74, 69, 82);
   ofDrawRectangle(1585, 150, 300, 4);
   ofDrawRectangle(1585, 976, 300, 4);
   ofDrawRectangle(1585, 150, 4, 830);
   ofDrawRectangle(1881, 150, 4, 830);
 
+  ofSetColor(255, 107, 74);
   fuente_texto.drawString("Entrada", 1640, 245);
   ofDrawLine(1640, 280, 1800, 280);
   fuente_texto.drawString("Salida", 1640, 405);
   ofDrawLine(1640, 440, 1800, 440);
 
-  ofSetColor(235);
+  ofSetColor(255, 107, 74);
   ofDrawRectangle(posicion_boton_anterior, ancho_boton, alto_boton);
   ofDrawRectangle(posicion_boton_siguiente, ancho_boton, alto_boton);
-  ofSetColor(0);
+  ofSetColor(20, 22, 26);
   fuente_texto.drawString("Anterior", posicion_boton_anterior.x + 48, posicion_boton_anterior.y + 58);
   fuente_texto.drawString("Siguiente", posicion_boton_siguiente.x + 35, posicion_boton_siguiente.y + 58);
 
-  ofSetColor(255);
+  ofSetColor(166, 226, 46);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -329,12 +332,12 @@ void ofApp::dibujarTextoConFallback(string texto, float x, float y, float alpha)
       letra == "0" || letra == "1" || letra == "2" || letra == "3" || letra == "4" ||
       letra == "5" || letra == "6" || letra == "7" || letra == "8" || letra == "9")
   {
-    ofSetColor(0, alpha);
+    ofSetColor(166, 226, 46, alpha);
     fuente_titulo_fallback.drawString(letra, x, y);
   }
   else
   {
-    ofSetColor(0, alpha);
+    ofSetColor(166, 226, 46, alpha);
     fuente_titulo.drawString(letra, x, y);
   }
 }
